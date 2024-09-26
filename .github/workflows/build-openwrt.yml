@@ -1,6 +1,5 @@
 name: Build OpenWrt
 
-# Jalankan saat ada push atau pull request
 on:
   push:
     branches:
@@ -18,7 +17,7 @@ jobs:
     steps:
       # Checkout source code dari repository
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Update dan install feeds (dependencies)
       - name: Setup feeds
@@ -38,9 +37,9 @@ jobs:
           make download -j$(nproc)  # Download semua dependencies
           make -j$(nproc) || make -j1 V=s  # Build dengan paralel jobs
 
-      # Upload firmware hasil build sebagai artifacts
+      # Upload firmware hasil build sebagai artifacts (gunakan v3)
       - name: Upload firmware
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: openwrt-firmware
           path: bin/targets/
