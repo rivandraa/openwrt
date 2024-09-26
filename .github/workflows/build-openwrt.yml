@@ -1,0 +1,39 @@
+name: Build OpenWrt
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 2 * * *'  # build otomatis setiap hari pada jam 2 pagi
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Setup feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Config build
+        run: |
+          cp .config .config.old || true
+          make defconfig
+
+      - name: Build OpenWrt
+        run: |
+          make download -j$(nproc)  # Download semua source
+          make -j$(nproc) || make -j1 V=s  # Build dengan paralel jobs
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v2
+        with:
+          name: openwrt-firmware
+          path: bin/targets/
